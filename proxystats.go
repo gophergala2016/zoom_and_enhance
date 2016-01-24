@@ -40,8 +40,18 @@ func (pr *proxyStats) Insert(count int) {
 }
 
 func (pr *proxyStats) Stats() *statsSummary {
+	ts := time.Now()
+	interval := pr.SampleRate
+	data := make([]int, pr.Ring.Len())
+	idx := 0
+	pr.Ring.Do(func(v interface{}) {
+		if v != nil {
+			data[idx] = v.(int)
+		}
+		idx++
+	})
 
-	return &statsSummary{}
+	return &statsSummary{data, ts, interval}
 }
 
 func (pr *proxyStats) Track() {
@@ -51,7 +61,7 @@ func (pr *proxyStats) Track() {
 			select {
 			case <-ticker.C:
 				pr.Ring.Value = pr.counter
-				pr.Ring.Next()
+				pr.Ring = pr.Ring.Next()
 				pr.counter = 0
 			case <-in:
 				pr.counter++
