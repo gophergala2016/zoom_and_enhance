@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
+	"net/url"
 
 	"code.google.com/p/go-uuid/uuid"
-	"golang.org/x/net/http2"
 )
 
 // Generate a unique request ID so that incoming requests can be associated with
@@ -19,38 +19,54 @@ func genID() string {
 	return id.String()
 }
 
+func (e *endpoint) wildcardHandler(w http.ResponseWriter, r *http.Request) {
+	//log.Printf("Req: %#v", r)
+	c := http.Client{}
+
+	req, err := translateRequest(r, e)
+	if err != nil {
+		log.Println("Request Error:", err)
+	}
+
+	resp, err := c.Do(req)
+	if err != nil {
+		log.Println("Error:", err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("Response Error:", err)
+	}
+	w.Write(body)
+}
+
+func (e *endpoint) translateURL(r *http.Request) string {
+	newURL := url.URL{}
+	newURL.Host = e.OriginServers[0].Host
+	newURL.Path = r.URL.Path
+	newURL.Scheme = "http"
+	if e.OriginServers[0].HTTPS {
+		newURL.Scheme = "https"
+	}
+
+	return newURL.String()
+}
+
 func infoHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "hello")
 }
 
-func setHandlers(r *http.ServeMux) {
-	r.HandleFunc("/", infoHandler)
-	r.HandleFunc("/info", infoHandler)
+func setHandlers(r *http.ServeMux, e *endpoint) {
+	r.HandleFunc("/", e.wildcardHandler)
 }
 
-func main() {
-	var srv http.Server
+func translateRequest(r *http.Request, e *endpoint) (*http.Request, error) {
 
-	// Set Port
-	srv.Addr = "localhost:8080"
-	if httpAddr := os.Getenv("Address"); httpAddr != "" {
-		srv.Addr = httpAddr
-	}
+	url := e.translateURL(r)
 
-	// Mux setup
-	router := http.NewServeMux()
-
-	// Set mux
-	srv.Handler = router
-
-	// Set handlers
-	setHandlers(router)
-
-	err := http2.ConfigureServer(&srv, &http2.Server{})
+	req, err := http.NewRequest(r.Method, url, nil)
 	if err != nil {
-		log.Println("ConfigureServer Error:", err)
+		return nil, err
 	}
 
-	log.Printf("Listening on %s", srv.Addr)
-	srv.ListenAndServeTLS("example.com.crt", "example.com.key")
+	return req, nil
 }
