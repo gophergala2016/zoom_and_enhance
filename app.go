@@ -1,5 +1,13 @@
 package main
 
+import "log"
+
+type AppContext struct {
+	Stats proxyStats
+}
+
+var context AppContext
+
 func main() {
 	e := &endpoint{}
 
@@ -12,6 +20,20 @@ func main() {
 			HTTPS: false,
 		},
 	}
+	e.ProxyStats = NewProxyStats(10, 1)
+	e.ProxyStats.Track()
 
-	e.Serve()
+	go e.Serve()
+
+	e2 := &endpoint{}
+	e2.Address = "localhost:8081"
+	e2.Certs = certPair{"example.com.crt", "example.com.key"}
+
+	os, _ := NewOriginServer("http2.golang.org", 80, false)
+	log.Println("os:", os)
+	e2.OriginServers = []*originServer{os}
+
+	go e2.Serve()
+
+	select {}
 }

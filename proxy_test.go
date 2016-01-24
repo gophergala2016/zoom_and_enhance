@@ -12,5 +12,4 @@ func TestGenID(t *testing.T) {
 
 	id2 := genID()
 	assert.NotEqual(t, id, id2)
-
 }

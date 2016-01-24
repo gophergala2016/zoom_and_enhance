@@ -13,6 +13,7 @@ type endpoint struct {
 	Features      features
 	Address       string
 	Certs         certPair
+	ProxyStats    *proxyStats
 }
 
 type certPair struct {

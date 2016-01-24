@@ -20,6 +20,8 @@ func genID() string {
 }
 
 func (e *endpoint) wildcardHandler(w http.ResponseWriter, r *http.Request) {
+	e.ProxyStats.Insert(1)
+
 	//log.Printf("Req: %#v", r)
 	c := http.Client{}
 
