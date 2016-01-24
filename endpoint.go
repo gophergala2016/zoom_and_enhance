@@ -23,6 +23,13 @@ type certPair struct {
 
 type features map[string]bool
 
+func NewEndpoint(addr string, cert string, key string) *endpoint {
+	return &endpoint{
+		Address: addr,
+		Certs:   certPair{cert, key},
+	}
+}
+
 func (e *endpoint) Serve() error {
 	// TODO: Currently only support single server per endpoint
 	if len(e.OriginServers) > 1 {
