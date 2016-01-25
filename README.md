@@ -2,6 +2,7 @@
 HTTP/2 proxy for HTTP1.x servers.
 
 ### Overview
+Bring your app into the next generation (without having to change a thing). HTTP2fer allows you to set up a lightweight transforming proxy between your backend and the outside world, so HTTP2-enabled clients can send HTTP2 requests, while your HTTP1 backend can continue to work as it always has.
 
 ### Features
 - [x] Proxy
