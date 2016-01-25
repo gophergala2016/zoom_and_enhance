@@ -1,3 +1,18 @@
+## HTTP2fer
+HTTP/2 proxy for HTTP1.x servers.
+
+### Overview
+
+### Features
+- [x] Proxy
+- [x] SSL (required by most browsers)
+- [ ] Load Balancing (multiple origin servers)
+- [ ] Pipelining
+- [x] Stats
+- [ ] Throttling
+- [ ] Health Checking
+- [x] Web UI
+
 # Frontend
 A lightweight UI will provide users access to statistics and metrics about each endpoint (traffic, health, etc), as well as the ability to create, modify, and delete proxied endpoints.
 
